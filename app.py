@@ -21,16 +21,30 @@ def get_data(records:int):
 
 def show_time_series(df):
     chart = alt.Chart(df).mark_circle().encode(
-        alt.X('zeit:T'), 
-        alt.Y('value:Q'), 
+        alt.X('zeit:T', axis=alt.Axis(title="")), 
+        alt.Y('value:Q', axis=alt.Axis(title="Messwert")), 
         color = 'variable',
         tooltip=['zeit', 'variable', 'value'])
     st.altair_chart(chart, use_container_width=True)
 
+
+def get_emoji(temp)-> str:
+    result =""
+    if temp<18:
+        result = "🥶"
+    elif temp < 23:
+        result = "😀"
+    else:
+        result = "🥵"
+    
+    return result
+
+
 def show_box_plot(df):
     chart =  alt.Chart(df).mark_boxplot().encode(
-        x='variable:O',
-        y='value:Q')
+        alt.X('variable:O'),
+        alt.Y('value:Q', axis=alt.Axis(title="Messwert"))
+    )
     st.altair_chart(chart, use_container_width=True)
 
 def main():
@@ -40,8 +54,8 @@ def main():
     temp = df.iloc[0]['temperatur']
     obs_time = df.iloc[0]['zeit']
     obs_time = obs_time.strftime("%d.%m.%Y %H:%M")
-    st.markdown(f"## Rhein Temperatur ")
-    st.markdown(f"aktuell: ({obs_time}): <b>{temp}</b> C°", unsafe_allow_html=True)
+    st.markdown(f"## Rhein Temperatur 🌡️")
+    st.markdown(f"aktuell: ({obs_time}): <b>{temp}</b> C° {get_emoji(temp)}", unsafe_allow_html=True)
     tage = st.number_input('Anzeige seit n Tagen',value = default_history)
     df = get_data(tage * 24 * 4)
     variablen = st.multiselect('Variablen in Grafik',['temperatur','leitfaehigkeit','O2','pH'], default=['temperatur'])
@@ -52,7 +66,8 @@ def main():
     
     show_time_series(df)
     show_box_plot(df)
-    
+
+    st.markdown(f"<sup>Datenquelle: [opendata.bs](https://data.bs.ch/explore/dataset/100046/table/?sort=startzeitpunkt)</sup><br><sup>[github repo](https://github.com/lcalmbach/bach-app)</sup>", unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
