@@ -20,11 +20,11 @@ def get_data(records:int):
     
 
 def show_time_series(df):
-    chart = alt.Chart(df).mark_circle().encode(
+    chart = alt.Chart(df).mark_line().encode(
         alt.X('zeit:T', axis=alt.Axis(title="")), 
-        alt.Y('value:Q', axis=alt.Axis(title="Messwert")), 
+        alt.Y('value:Q', axis=alt.Axis(title="Temperatur (°C)")), 
         color = 'variable',
-        tooltip=['zeit', 'variable', 'value'])
+        tooltip=['zeit', 'value'])
     st.altair_chart(chart, use_container_width=True)
 
 
@@ -40,13 +40,6 @@ def get_emoji(temp)-> str:
     return result
 
 
-def show_box_plot(df):
-    chart =  alt.Chart(df).mark_boxplot().encode(
-        alt.X('variable:O'),
-        alt.Y('value:Q', axis=alt.Axis(title="Messwert"))
-    )
-    st.altair_chart(chart, use_container_width=True)
-
 def main():
     st.image('./images/rheinschwimmen-2006-4.jpg',width=800)
     df = get_data(1)
@@ -56,16 +49,14 @@ def main():
     obs_time = obs_time.strftime("%d.%m.%Y %H:%M")
     st.markdown(f"## Rhein Temperatur 🌡️")
     st.markdown(f"aktuell: ({obs_time}): <b>{temp}</b> C° {get_emoji(temp)}", unsafe_allow_html=True)
-    tage = st.number_input('Anzeige seit n Tagen',value = default_history)
+    tage = st.number_input('Anzeige seit n Tagen', value = default_history)
     df = get_data(tage * 24 * 4)
-    variablen = st.multiselect('Variablen in Grafik',['temperatur','leitfaehigkeit','O2','pH'], default=['temperatur'])
     # Beschränke Felder auf Zeit + Ausgewählte Variablen
-    df = df[['zeit'] + variablen]
+    df = df[['zeit', 'temperatur']]
     # Entpivotiere den Dataframe
-    df = pd.melt(df, id_vars=['zeit'], value_vars=variablen)
-    
-    show_time_series(df)
-    show_box_plot(df)
+    df = pd.melt(df, id_vars=['zeit'], value_vars='temperatur')
+    with st.beta_expander("Grafik"):
+        show_time_series(df)
 
     st.markdown(f"<sup>Datenquelle: [opendata.bs](https://data.bs.ch/explore/dataset/100046/table/?sort=startzeitpunkt)</sup><br><sup>[github repo](https://github.com/lcalmbach/bach-app)</sup>", unsafe_allow_html=True)
 
