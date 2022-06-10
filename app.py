@@ -28,18 +28,6 @@ def show_time_series(df):
     st.altair_chart(chart, use_container_width=True)
 
 
-def get_emoji(temp)-> str:
-    result =""
-    if temp < 19:
-        result = "🥶"
-    elif temp < 23:
-        result = "😀"
-    else:
-        result = "🥵"
-    
-    return result
-
-
 def main():
     st.image('./images/rheinschwimmen-2006-4.jpg', width=800)
     df = get_data(1)
@@ -48,13 +36,15 @@ def main():
     obs_time = df.iloc[0]['zeit']
     obs_time = obs_time.strftime("%d.%m.%Y %H:%M")
     st.markdown(f"## Rhein Temperatur 🌡️")
-    st.markdown(f"aktuell: ({obs_time}): <b>{temp}</b> C° {get_emoji(temp)}", unsafe_allow_html=True)
-    tage = st.number_input('Anzeige seit n Tagen', min_value = 1, max_value=90, value = default_history)
-    df = get_data(tage * 24 * 4)
-    df = df[['zeit', 'temperatur']]
-    # unpivot dataframe
-    df = pd.melt(df, id_vars=['zeit'], value_vars='temperatur')
-    show_time_series(df)
+    st.markdown(f"Zeit: {obs_time}")
+    st.metric(label="Temperatur", value=f"{temp:.1f} °C")
+    with st.expander('Zeitlicher Verlauf'):
+        tage = st.number_input('Anzeige seit n Tagen', min_value = 1, max_value=90, value = default_history)
+        df = get_data(tage * 24 * 4)
+        df = df[['zeit', 'temperatur']]
+        # unpivot dataframe
+        df = pd.melt(df, id_vars=['zeit'], value_vars='temperatur')
+        show_time_series(df)
 
     st.markdown(f"<sup>BachApp Version 1.1</sup><br><sup>Datenquelle: [opendata.bs](https://data.bs.ch/explore/dataset/100046/table/?sort=startzeitpunkt)</sup><br><sup>[github repo](https://github.com/lcalmbach/bach-app)</sup>", unsafe_allow_html=True)
 
