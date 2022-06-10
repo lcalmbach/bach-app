@@ -23,14 +23,14 @@ def show_time_series(df):
     chart = alt.Chart(df).mark_line().encode(
         alt.X('zeit:T', axis=alt.Axis(title="")), 
         alt.Y('value:Q', axis=alt.Axis(title="Temperatur (°C)")), 
-        color = 'variable',
+        color=alt.Color('variable', legend=None),
         tooltip=['zeit', 'value'])
     st.altair_chart(chart, use_container_width=True)
 
 
 def get_emoji(temp)-> str:
     result =""
-    if temp<18:
+    if temp < 19:
         result = "🥶"
     elif temp < 23:
         result = "😀"
@@ -41,7 +41,7 @@ def get_emoji(temp)-> str:
 
 
 def main():
-    st.image('./images/rheinschwimmen-2006-4.jpg',width=800)
+    st.image('./images/rheinschwimmen-2006-4.jpg', width=800)
     df = get_data(1)
     
     temp = df.iloc[0]['temperatur']
@@ -49,16 +49,14 @@ def main():
     obs_time = obs_time.strftime("%d.%m.%Y %H:%M")
     st.markdown(f"## Rhein Temperatur 🌡️")
     st.markdown(f"aktuell: ({obs_time}): <b>{temp}</b> C° {get_emoji(temp)}", unsafe_allow_html=True)
-    tage = st.number_input('Anzeige seit n Tagen', value = default_history)
+    tage = st.number_input('Anzeige seit n Tagen', min_value = 1, max_value=90, value = default_history)
     df = get_data(tage * 24 * 4)
-    # Beschränke Felder auf Zeit + Ausgewählte Variablen
     df = df[['zeit', 'temperatur']]
-    # Entpivotiere den Dataframe
+    # unpivot dataframe
     df = pd.melt(df, id_vars=['zeit'], value_vars='temperatur')
-    with st.beta_expander("Grafik"):
-        show_time_series(df)
+    show_time_series(df)
 
-    st.markdown(f"<sup>Datenquelle: [opendata.bs](https://data.bs.ch/explore/dataset/100046/table/?sort=startzeitpunkt)</sup><br><sup>[github repo](https://github.com/lcalmbach/bach-app)</sup>", unsafe_allow_html=True)
+    st.markdown(f"<sup>BachApp Version 1.1</sup><br><sup>Datenquelle: [opendata.bs](https://data.bs.ch/explore/dataset/100046/table/?sort=startzeitpunkt)</sup><br><sup>[github repo](https://github.com/lcalmbach/bach-app)</sup>", unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
