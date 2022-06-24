@@ -37,7 +37,7 @@ def main():
     obs_time = obs_time.strftime("%d.%m.%Y %H:%M")
     st.markdown(f"## Rhein Temperatur 🌡️")
     st.markdown(f"Zeit: {obs_time}")
-    st.metric(label="Temperatur", value=f"{temp:.1f} °C")
+    st.metric(label="Wasser Temperatur", value=f"{temp:.1f} °C")
     with st.expander('Zeitlicher Verlauf'):
         tage = st.number_input('Anzeige seit n Tagen', min_value = 1, max_value=90, value = default_history)
         df = get_data(tage * 24 * 4)
